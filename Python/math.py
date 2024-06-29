@@ -1,4 +1,3 @@
-
 def get_primes(n):
     # n以下のすべての数について素数かどうかを記録する配列
     is_prime = [True] * (n + 1)

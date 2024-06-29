@@ -11,13 +11,9 @@ import math
 from bisect import bisect_left, bisect_right
 from heapq import heapify, heappop, heappush
 import string
-import inspect
-
 
 # 外部ライブラリ
 # from sortedcontainers import SortedSet, SortedList, SortedDict
-
-
 sys.setrecursionlimit(10**7)
 alph_s = tuple(string.ascii_lowercase)
 alph_l = tuple(string.ascii_uppercase)
