@@ -16,16 +16,6 @@ import inspect
 
 # 外部ライブラリ
 # from sortedcontainers import SortedSet, SortedList, SortedDict
-def deb(*vars):
-    try:
-        frame = inspect.currentframe().f_back
-        names = {id(value): name for name, value in frame.f_locals.items()}
-        for var in vars:
-            var_id = id(var)
-            var_name = names.get(var_id, "<unknown>")
-            sys.stderr.write(f"{var_name}: {var}\n")
-    except Exception as e:
-        sys.stderr.write(f"Error in deb function: {e}\n")
 
 
 sys.setrecursionlimit(10**7)
