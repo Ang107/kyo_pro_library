@@ -1,9 +1,9 @@
 from collections import deque, defaultdict
 
 
-def topological_sort(n: int, output_edge: defaultdict, input_edge: defaultdict):
+def topological_sort(n: int, output_edge, input_edge):
     ans = []
-    for i in range(1, n+1):
+    for i in range(1, n + 1):
         if not input_edge[i]:
             ans.append(i)
     deq = deque(ans)

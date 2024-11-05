@@ -1,5 +1,4 @@
 import typing
-from collections import defaultdict, deque
 
 
 class BIT:
@@ -29,21 +28,3 @@ class BIT:
             r -= r & -r
 
         return s
-
-
-# AをBにするのに必要な転倒数を計算
-# O(NlogN)
-def get_inversion_number(A, B):
-    to_idx = defaultdict(deque)
-    for idx, a in enumerate(A):
-        to_idx[a].append(idx)
-    nB = []
-    for i in B:
-        nB.append(to_idx[i][0])
-        to_idx[i].popleft()
-    bit = BIT(len(nB))
-    ans = 0
-    for idx, i in enumerate(nB):
-        ans += bit.sum(i + 1, len(nB))
-        bit.add(i, 1)
-    return ans

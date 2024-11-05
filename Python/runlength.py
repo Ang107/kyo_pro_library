@@ -7,7 +7,7 @@ def runLengthEncode(S):
     grouped = groupby(S)
     res = []
     for k, v in grouped:
-        res.append((k, int(len(list(v)))))
+        res.append((k, len(list(v))))
     return res
 
 
