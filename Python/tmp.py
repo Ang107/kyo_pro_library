@@ -113,43 +113,6 @@ class MyDeque(Generic[T]):
         assert 0 <= i <= self._size or -self._size <= i <= -1
         self.pop(i)
 
-    def __add__(self, other: Iterable[T]):
-        """
-        Concatenate this deque with another iterable and return a new deque.
-        Time complexity: O(n + k), where n is the size of this deque,
-        and k is the size of the other iterable.
-        """
-        new_deque = MyDeque(list(self), maxlen=self.maxlen)
-        new_deque.extend(other)
-        return new_deque
-
-    def __iadd__(self, other: Iterable[T]):
-        """
-        Add another iterable to this deque in-place.
-        Time complexity: O(k), where k is the size of the other iterable.
-        """
-        self.extend(other)
-        return self
-
-    def __mul__(self, n: int):
-        """
-        Repeat the elements of the deque n times and return a new deque.
-        Time complexity: O(n * m),
-        where n is the size of this deque,and m is the repetition factor.
-        """
-        return MyDeque(list(self) * n, maxlen=self.maxlen)
-
-    def __imul__(self, n: int):
-        """
-        Repeat the elements of the deque n times in-place.
-        Time complexity: O(n * m),
-        where n is the size of this deque, and m is the repetition factor.
-        """
-        repeated = list(self) * n
-        self.clear()
-        self.extend(repeated)
-        return self
-
     def reverse(self) -> None:
         """
         Reverse the order of the deque in O(1).
@@ -178,13 +141,7 @@ class MyDeque(Generic[T]):
         """
         sorted_list = sorted(self, key=key, reverse=reverse)
         self._l = []
-        self._r = []
-        for i, x in enumerate(sorted_list):
-            if i < self._size >> 1:
-                self._l.append(x)
-            else:
-                self._r.append(x)
-        self._l.reverse()
+        self._r = sorted_list
         self._l_delled = 0
         self._r_delled = 0
 
@@ -327,3 +284,278 @@ class MyDeque(Generic[T]):
         else:
             for _ in range(-k):
                 self.append(self.popleft())
+
+
+class TwoStackDeque:
+    __slots__ = ("front", "back")
+
+    def __init__(self, iterable=None) -> None:
+        init_arr = list(iterable) if iterable else []
+        mid = len(init_arr) >> 1
+        self.front = init_arr[:mid][::-1]
+        self.back = init_arr[mid:]
+
+    def _balance(self) -> None:
+        source, target = (
+            (self.front, self.back) if not self.back else (self.back, self.front)
+        )
+        mid = len(source) >> 1
+        target.extend(source[: mid + 1][::-1])
+        del source[: mid + 1]
+
+    def append(self, item) -> None:
+        self.back.append(item)
+
+    def appendleft(self, item) -> None:
+        self.front.append(item)
+
+    def pop(self):
+        if not self:
+            raise IndexError("pop from empty deque")
+        if not self.back:
+            self._balance()
+        return self.back.pop()
+
+    def popleft(self):
+        if not self:
+            raise IndexError("popleft from empty deque")
+        if not self.front:
+            self._balance()
+        return self.front.pop()
+
+    def __getitem__(self, i: int):
+        l = len(self)
+        if i < -l or l <= i:
+            raise IndexError("deque index out of range")
+        i = i if i >= 0 else i + l
+        if i < len(self.front):
+            return self.front[~i]
+        else:
+            return self.back[i - len(self.front)]
+
+    def __len__(self) -> int:
+        return len(self.front) + len(self.back)
+
+
+# ごりちゃんさんのDeque
+class RingBufferDeque:
+    def __init__(self, src_arr=[], max_size=300000):
+        self.N = max(max_size, len(src_arr)) + 1
+        self.buf = list(src_arr) + [None] * (self.N - len(src_arr))
+        self.head = 0
+        self.tail = len(src_arr)
+
+    def __index(self, i):
+        l = len(self)
+        if not -l <= i < l:
+            raise IndexError("index out of range: " + str(i))
+        if i < 0:
+            i += l
+        return (self.head + i) % self.N
+
+    def __extend(self):
+        ex = self.N - 1
+        self.buf[self.tail + 1 : self.tail + 1] = [None] * ex
+        self.N = len(self.buf)
+        if self.head > 0:
+            self.head += ex
+
+    def is_full(self):
+        return len(self) >= self.N - 1
+
+    def is_empty(self):
+        return len(self) == 0
+
+    def append(self, x):
+        if self.is_full():
+            self.__extend()
+        self.buf[self.tail] = x
+        self.tail += 1
+        self.tail %= self.N
+
+    def appendleft(self, x):
+        if self.is_full():
+            self.__extend()
+        self.buf[(self.head - 1) % self.N] = x
+        self.head -= 1
+        self.head %= self.N
+
+    def pop(self):
+        if self.is_empty():
+            raise IndexError("pop() when buffer is empty")
+        ret = self.buf[(self.tail - 1) % self.N]
+        self.tail -= 1
+        self.tail %= self.N
+        return ret
+
+    def popleft(self):
+        if self.is_empty():
+            raise IndexError("popleft() when buffer is empty")
+        ret = self.buf[self.head]
+        self.head += 1
+        self.head %= self.N
+        return ret
+
+    def __len__(self):
+        return (self.tail - self.head) % self.N
+
+    def __getitem__(self, key):
+        return self.buf[self.__index(key)]
+
+    def __setitem__(self, key, value):
+        self.buf[self.__index(key)] = value
+
+    def __str__(self):
+        return "Deque({0})".format(str(list(self)))
+
+
+import time
+from collections import deque
+import random
+import matplotlib.pyplot as plt
+import numpy as np
+import statistics
+import matplotlib
+
+matplotlib.use("Agg")  # GUIを使わない描画バックエンドを設定
+
+
+# 特定操作の時間計測
+def test_operation(deque_obj, operation, n):
+    start_time = time.perf_counter()
+    for _ in range(n):
+        if operation == "append":
+            deque_obj.append(random.randint(-100, 100))
+        elif operation == "appendleft":
+            deque_obj.appendleft(random.randint(-100, 100))
+        elif operation == "pop":
+            if len(deque_obj) > 0:
+                deque_obj.pop()
+        elif operation == "popleft":
+            if len(deque_obj) > 0:
+                deque_obj.popleft()
+        elif operation == "random_access":
+            if len(deque_obj) > 0:
+                index = random.randrange(len(deque_obj))
+                _ = deque_obj[index]
+    return time.perf_counter() - start_time
+
+
+def run_tests(deque_class, size, operations, repetitions, num_trials=5):
+    results = {}
+    for op in operations:
+        op_times = []
+        for _ in range(num_trials):
+            deque_obj = deque_class(list(range(size)))
+            op_times.append(test_operation(deque_obj, op, repetitions))
+        results[op] = {
+            "mean": statistics.mean(op_times),
+            "stdev": statistics.stdev(op_times) if len(op_times) > 1 else 0,
+        }
+    return results
+
+
+# テスト結果の描画関数
+def plot_results(sizes, std_results, rb_results, ts_results, my_results, operations):
+    fig, axs = plt.subplots(
+        len(operations), 1, figsize=(10, 4 * len(operations)), sharex=True
+    )
+    fig.suptitle("Deque Performance Comparison", y=1.02)
+
+    x = np.arange(len(sizes))
+    width = 0.25
+
+    for i, op in enumerate(operations):
+        std_times = [std_results[size][op]["mean"] for size in sizes]
+        rb_times = [rb_results[size][op]["mean"] for size in sizes]
+        ts_times = [ts_results[size][op]["mean"] for size in sizes]
+        my_times = [my_results[size][op]["mean"] for size in sizes]
+
+        std_err = [std_results[size][op]["stdev"] for size in sizes]
+        rb_err = [rb_results[size][op]["stdev"] for size in sizes]
+        ts_err = [ts_results[size][op]["stdev"] for size in sizes]
+        my_err = [my_results[size][op]["stdev"] for size in sizes]
+
+        axs[i].bar(
+            x - width,
+            std_times,
+            width,
+            yerr=std_err,
+            label="Std Deque",
+            color="blue",
+            capsize=5,
+        )
+        axs[i].bar(
+            x,
+            rb_times,
+            width,
+            yerr=rb_err,
+            label="Ring buffer Deque",
+            color="green",
+            capsize=5,
+        )
+        axs[i].bar(
+            x + width,
+            ts_times,
+            width,
+            yerr=ts_err,
+            label="Two Stack Deque",
+            color="red",
+            capsize=5,
+        )
+        axs[i].bar(
+            x + 2 * width,
+            my_times,
+            width,
+            yerr=ts_err,
+            label="MyDeque",
+            color="Yellow",
+            capsize=5,
+        )
+
+        axs[i].set_ylabel("Time (s)")
+        axs[i].set_title(f"{op} Operation")
+        axs[i].set_xticks(x)
+        axs[i].set_xticklabels(sizes)
+        axs[i].legend(loc="upper left")
+
+        # random_accessの場合のみ対数スケールを使用
+        if op == "random_access":
+            axs[i].set_yscale("log")
+        else:
+            axs[i].set_yscale("linear")
+
+    plt.xlabel("Number of Elements")
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.95)
+    plt.savefig("output_plot.png")
+
+
+# テスト実行
+sizes = [1000, 10000, 100000, 1000000]
+operations = ["append", "appendleft", "pop", "popleft", "random_access"]
+repetitions = 10000
+num_trials = 100  # 試行回数
+
+std_results = {}
+rb_results = {}
+ts_results = {}
+my_results = {}
+
+for size in sizes:
+    print(f"Testing with {size} elements:")
+    std_results[size] = run_tests(deque, size, operations, repetitions, num_trials)
+    rb_results[size] = run_tests(
+        RingBufferDeque, size, operations, repetitions, num_trials
+    )
+    ts_results[size] = run_tests(
+        TwoStackDeque, size, operations, repetitions, num_trials
+    )
+    my_results[size] = run_tests(MyDeque, size, operations, repetitions, num_trials)
+    # print("Standard deque results:", std_results[size])
+    # print("Ring Buffer deque results:", rb_results[size])
+    # print("Two Stack deque results:", ts_results[size])
+    # print()
+
+# 結果を描画
+plot_results(sizes, std_results, rb_results, ts_results, my_results, operations)
