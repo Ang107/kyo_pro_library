@@ -350,6 +350,8 @@ class SmartDeque(Generic[T]):
         Remove unused elements (garbage) and reorganize the deque.
         Time complexity: O(n), where n is the number of elements in the deque.
         """
+        if self.garbage_size == 0:
+            return
         tmp = list(self)
         mid = self._size >> 1
         self._l = tmp[:mid][::-1]
