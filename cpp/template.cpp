@@ -24,7 +24,9 @@ export_var(const atcoder::dynamic_modint<m> &mint, const std::string &indent,
 } // namespace cpp_dump::_detail
 #define dump(...) cpp_dump(__VA_ARGS__)
 namespace cp = cpp_dump;
-CPP_DUMP_SET_OPTION_GLOBAL(max_line_width, 80);
+CPP_DUMP_SET_OPTION_GLOBAL(max_line_width, 160);
+CPP_DUMP_SET_OPTION_GLOBAL(max_depth, 100);
+CPP_DUMP_SET_OPTION_GLOBAL(max_iteration_count, 200000);
 CPP_DUMP_SET_OPTION_GLOBAL(log_label_func, cp::log_label::filename());
 CPP_DUMP_SET_OPTION_GLOBAL(enable_asterisk, true);
 #else
@@ -51,7 +53,20 @@ struct Init {
 #define pii pair<int, int>
 #define pll pair<long long, long long>
 #define elif else if
-#define rep(i, n) for (int i = 0; i < (n); i++)
+#define overload4(_1, _2, _3, _4, name, ...) name
+#define overload3(_1, _2, _3, name, ...) name
+#define rep1(n) for (ll i = 0; i < n; ++i)
+#define rep2(i, n) for (ll i = 0; i < n; ++i)
+#define rep3(i, a, b) for (ll i = a; i < b; ++i)
+#define rep4(i, a, b, c) for (ll i = a; i < b; i += c)
+#define rep(...) overload4(__VA_ARGS__, rep4, rep3, rep2, rep1)(__VA_ARGS__)
+#define rrep1(n) for (ll i = n; i--;)
+#define rrep2(i, n) for (ll i = n; i--;)
+#define rrep3(i, a, b) for (ll i = b; i-- > (a);)
+#define rrep4(i, a, b, c)                                                      \
+    for (ll i = (a) + ((b) - (a) - 1) / (c) * (c); i >= (a); i -= c)
+#define rrep(...)                                                              \
+    overload4(__VA_ARGS__, rrep4, rrep3, rrep2, rrep1)(__VA_ARGS__)
 #define all(v) (v).begin(), (v).end()
 #define rall(x) x.rbegin(), x.rend()
 #define el '\n'
