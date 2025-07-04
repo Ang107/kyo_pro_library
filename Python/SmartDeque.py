@@ -71,7 +71,7 @@ class SmartDeque(Generic[T]):
         """
         return x in self._l[self._l_delled :] or x in self._r[self._r_delled :]
 
-    def __getitem__(self, i) -> List[T] | T:
+    def __getitem__(self, i):
         """
         Access an element or a slice of the deque.
         Time complexity: O(1) for single access, O(k) for slicing.

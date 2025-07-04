@@ -139,10 +139,10 @@ def bfs_01(g: list[list[tuple[int, int]]], s: int) -> list[int]:
 
 
 def bfs_grid(
-    g: list[list[str | int]],
+    g: list[list[str]],
     sx: int,
     sy: int,
-    block: list[str | int],
+    block: list[str],
     dxy=((-1, 0), (1, 0), (0, -1), (0, 1)),
 ) -> list[list[int]]:
     """
